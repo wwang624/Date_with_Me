@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b0b">
+  <title>专属约会安排</title>
+  <style>
+    :root{--pink:#d6a84f;--pink2:#f0ca76;--soft:#211e1a;--ink:#f8f1e2;--muted:#b9ad98;--line:#5b4a2d;--card:#151515;--shadow:0 20px 60px rgba(0,0,0,.42)}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{min-height:100dvh;padding:18px;background:radial-gradient(circle at 12% 8%,rgba(214,168,79,.14),transparent 30%),linear-gradient(135deg,#0b0b0b,#211c16);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);overflow-x:hidden}
+    button,input,textarea{font:inherit}
+    .hearts{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+    .heart{position:absolute;bottom:-40px;opacity:0;animation:float var(--duration) var(--delay) infinite ease-in;color:#d6a84f}
+    @keyframes float{10%{opacity:.65}90%{opacity:.2}100%{transform:translateY(-110dvh) rotate(360deg);opacity:0}}
+    .app{position:relative;z-index:1;width:min(440px,100%);margin:0 auto;padding:10px 0 28px}
+    .step{display:none;animation:in .45s ease both}.step.active{display:block}
+    @keyframes in{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+    .card{background:rgba(21,21,21,.97);border:1px solid var(--line);border-radius:18px;padding:30px 22px 24px;box-shadow:var(--shadow);text-align:center;overflow:hidden;position:relative}
+    .card:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#735825,var(--pink2),#735825)}
+    .flowers{font-size:1.35rem;letter-spacing:.28rem;margin-bottom:16px}.flowers span{display:inline-block;animation:sway 2.5s ease-in-out infinite}.flowers span:nth-child(2n){animation-delay:.3s}
+    @keyframes sway{50%{transform:translateY(-3px) rotate(5deg)}}
+    .avatar{width:104px;height:104px;border-radius:50%;display:grid;place-items:center;margin:0 auto 16px;background:linear-gradient(145deg,#27231c,#0f0f0f);border:2px solid #a78035;box-shadow:0 8px 22px rgba(0,0,0,.35);font-size:3.3rem}
+    h1{font-size:clamp(1.45rem,6vw,1.8rem);line-height:1.45;margin-bottom:9px}p{color:var(--muted);line-height:1.7;font-size:.94rem}.subtitle{margin-bottom:22px}
+    .btns{display:flex;justify-content:center;gap:10px;margin-top:20px;flex-wrap:wrap}.btn{border:0;border-radius:999px;padding:13px 21px;cursor:pointer;font-weight:700;transition:transform .18s,box-shadow .18s,background .18s;min-height:46px}.btn:active{transform:scale(.97)}.primary{color:#1c160b;background:linear-gradient(135deg,var(--pink2),var(--pink));box-shadow:0 8px 19px rgba(214,168,79,.2)}.secondary{color:#d7c7a8;background:var(--soft);border:1px solid var(--line)}.btn:focus-visible{outline:3px solid #a78035;outline-offset:2px}
+    .runaway{z-index:2;touch-action:none;will-change:left,top,transform}.runaway.moved{position:fixed;transition:left .16s ease,top .16s ease,transform .16s ease}.runaway-warning{font-size:.76rem;color:#c989a8;margin-top:10px;min-height:1.2em}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}.food{padding:12px 5px;border:2px solid transparent;border-radius:12px;background:var(--soft);cursor:pointer;transition:.2s;user-select:none}.food:active{transform:scale(.97)}.food.selected{border-color:var(--pink);background:#3a2e1c;box-shadow:0 5px 14px rgba(214,168,79,.14)}.food .emoji{display:block;font-size:1.9rem;margin-bottom:4px}.food small{font-size:.76rem;color:#c6b798;font-weight:600}.food.selected small{color:var(--pink2)}
+    .choice-title{text-align:left;font-size:.82rem;letter-spacing:.08em;color:#bda779;margin:18px 0 7px;padding-left:2px}.choice-title:first-of-type{margin-top:6px}
+    .field{text-align:left;margin:12px 0}.field label{display:block;font-size:.84rem;font-weight:700;color:#c5b797;margin:0 0 6px}.input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px 13px;background:#211e1a;color:var(--ink);outline:0}.input:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(214,168,79,.1)}
+    .summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:19px 0}.detail{background:var(--soft);border-radius:12px;padding:12px 8px}.detail.full{grid-column:1/-1}.detail b{display:block;font-size:.72rem;color:#aa997a;margin-bottom:3px;font-weight:600}.detail span{font-weight:700;font-size:.9rem;word-break:break-word}
+    .status{margin-top:14px;padding:12px 13px;border-radius:10px;background:#332813;color:#e4c77f;font-size:.84rem;line-height:1.55;text-align:left;display:none}.status.show{display:block}.share-note{font-size:.78rem;margin-top:13px;color:#9e917a}
+    .dots{display:flex;justify-content:center;gap:6px;margin-top:20px}.dot{width:7px;height:7px;border-radius:10px;background:#5b4a2d}.dot.on{width:22px;background:var(--pink)}
+    .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:#e7c36f;color:#1b150b;border-radius:999px;padding:10px 16px;font-size:.86rem;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:3;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:360px){.card{padding:26px 15px 20px}.grid{gap:7px}.food .emoji{font-size:1.6rem}.btn{padding-inline:17px}}
+  </style>
+</head>
+<body>
+  <div class="hearts" id="hearts" aria-hidden="true"></div>
+  <main class="app">
+    <section class="step active" id="step1">
+      <div class="card">
+        <div class="flowers"><span>♠</span><span>✦</span><span>◆</span><span>✦</span><span>♠</span></div>
+        <div class="avatar">🕴️</div>
+        <h1>通知：你的时间<br>已经被我征用了。</h1>
+        <p class="subtitle">周末的行程我已经替你留出来。现在回答我：接受安排，还是继续嘴硬？</p>
+        <div class="btns"><button class="btn primary" id="yesBtn">接受安排</button><button class="btn secondary runaway" id="noBtn" type="button">拒绝？不接受</button></div><div class="runaway-warning" id="runawayHint">拒绝按钮不提供有效选项。</div>
+      </div>
+    </section>
+
+    <section class="step" id="step2">
+      <div class="card">
+        <div class="flowers"><span>♜</span><span>✦</span><span>◆</span><span>✦</span><span>♜</span></div>
+        <h1>晚餐由你选，<br>但最后由我拍板。</h1><p class="subtitle">把你的偏好交上来。今晚怎么安排，由我决定。</p>
+        <div class="choice-title">第一项：你想吃什么</div>
+        <div class="grid" id="foodGrid">
+          <button class="food" data-food="奶茶"><span class="emoji">🧋</span><small>奶茶</small></button><button class="food" data-food="烤肉"><span class="emoji">🥩</span><small>烤肉</small></button><button class="food" data-food="火锅"><span class="emoji">🍲</span><small>火锅</small></button><button class="food" data-food="烧烤"><span class="emoji">🍖</span><small>烧烤</small></button><button class="food" data-food="日料"><span class="emoji">🍣</span><small>日料</small></button><button class="food" data-food="西餐"><span class="emoji">🥗</span><small>西餐</small></button><button class="food" data-food="甜品"><span class="emoji">🍰</span><small>甜品</small></button><button class="food" data-food="小龙虾"><span class="emoji">🦞</span><small>小龙虾</small></button><button class="food" data-food="咖啡"><span class="emoji">☕</span><small>咖啡</small></button>
+        </div>
+        <div class="choice-title">第二项：饭后要做什么</div>
+        <div class="grid" id="activityGrid">
+          <button class="food" data-food="看电影"><span class="emoji">🎬</span><small>看电影</small></button><button class="food" data-food="逛街"><span class="emoji">🛍️</span><small>逛街</small></button><button class="food" data-food="看展"><span class="emoji">🖼️</span><small>看展</small></button><button class="food" data-food="散步"><span class="emoji">🌆</span><small>散步</small></button><button class="food" data-food="桌游"><span class="emoji">🎲</span><small>桌游</small></button><button class="food" data-food="拍照"><span class="emoji">📸</span><small>拍照</small></button>
+        </div>
+        <div class="choice-title">第三项：最后怎么收尾</div>
+        <div class="grid" id="endingGrid">
+          <button class="food" data-food="看夜景"><span class="emoji">🌃</span><small>看夜景</small></button><button class="food" data-food="去书店"><span class="emoji">📚</span><small>去书店</small></button><button class="food" data-food="兜风"><span class="emoji">🚗</span><small>兜风</small></button><button class="food" data-food="吃甜品"><span class="emoji">🍮</span><small>吃甜品</small></button><button class="food" data-food="拍立得留念"><span class="emoji">🖼️</span><small>留张纪念</small></button><button class="food" data-food="听我安排"><span class="emoji">♛</span><small>听我安排</small></button>
+        </div>
+        <div class="btns"><button class="btn primary" id="foodNext">选好了，继续</button></div><div class="dots"><i class="dot"></i><i class="dot on"></i><i class="dot"></i></div>
+      </div>
+    </section>
+
+    <section class="step" id="step3">
+      <div class="card">
+        <div class="flowers"><span>⌚</span><span>✦</span><span>◆</span><span>✦</span><span>⌖</span></div>
+        <h1>把时间和地点<br>交给我。</h1><p class="subtitle">填好。不要让我等太久。</p>
+        <div class="field"><label for="date">📅 日期</label><input class="input" id="date" type="date"></div>
+        <div class="field"><label for="time">⏰ 时间</label><input class="input" id="time" type="time" value="18:00"></div>
+        <div class="field"><label for="place">⌖ 见面地点</label><input class="input" id="place" type="text" placeholder="例如：某某商场 / 地铁站"></div>
+        <div class="field"><label for="message">✦ 给我的留言（可选）</label><textarea class="input" id="message" rows="2" placeholder="说点我想听的话"></textarea></div>
+        <div class="btns"><button class="btn primary" id="confirmBtn">确认安排</button></div><div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot on"></i></div>
+      </div>
+    </section>
+
+    <section class="step" id="step4">
+      <div class="card">
+        <div class="flowers"><span>♛</span><span>✦</span><span>♛</span><span>✦</span><span>♛</span></div><div class="avatar">🖤</div>
+        <h1>很好。安排已经确认。</h1><p class="subtitle">这一次，你只需要准时出现。其他的，我来负责。</p>
+        <div class="summary"><div class="detail"><b>日期</b><span id="outDate">-</span></div><div class="detail"><b>时间</b><span id="outTime">-</span></div><div class="detail"><b>安排</b><span id="outFood">-</span></div><div class="detail"><b>地点</b><span id="outPlace">-</span></div><div class="detail full"><b>你写给我的话</b><span id="outMessage">-</span></div></div>
+        <div class="btns"><button class="btn primary" id="shareBtn">把结果发给我</button><button class="btn secondary" id="copyBtn">复制安排</button></div>
+        <div class="status" id="shareStatus"></div><p class="share-note">点击后选择微信，把这份安排发给我。别让我等你的回复。</p>
+        <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot on"></i></div>
+      </div>
+    </section>
+
+    <section class="step" id="reject">
+      <div class="card"><div class="flowers"><span>♠</span><span>✦</span><span>♠</span></div><div class="avatar">🖤</div><h1>你可以嘴硬。</h1><p class="subtitle">但这份安排，暂时不接受取消。</p><div class="btns"><button class="btn secondary" id="backBtn">回去接受安排</button></div></div>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status"></div>
+  <script>
+    const state={foods:[],date:'',time:'',place:'',message:'',shareText:''};
+    const $=id=>document.getElementById(id);
+    function show(id){document.querySelectorAll('.step').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
+    function toast(text){$('toast').textContent=text;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
+    function defaultDate(){const d=new Date();d.setDate(d.getDate()+1);$('date').value=d.toISOString().slice(0,10)}
+    function formatDate(v){if(!v)return '待商量';const d=new Date(v+'T00:00:00');return `${d.getMonth()+1}月${d.getDate()}日（${['周日','周一','周二','周三','周四','周五','周六'][d.getDay()]}）`}
+    function resultText(){return `【专属约会安排】\n\n日期：${formatDate(state.date)}\n时间：${state.time||'待商量'}\n安排：${state.foods.join('、')||'由我决定'}\n地点：${state.place||'由我通知'}${state.message?`\n\n给我的留言：${state.message}`:''}\n\n安排已确认。请准时出现。`}
+    async function copyText(text){try{await navigator.clipboard.writeText(text);return true}catch(e){const area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}area.remove();return ok}}
+    async function share(){const text=state.shareText;if(navigator.share){try{await navigator.share({title:'专属约会安排',text});$('shareStatus').textContent='分享面板已打开。选择微信，然后发给我。';$('shareStatus').classList.add('show');return}catch(e){if(e&&e.name==='AbortError')return}}const copied=await copyText(text);const status=$('shareStatus');status.textContent=copied?'内容已复制。打开微信，粘贴后发给我。':'当前浏览器不支持自动复制，请长按结果文字后发给我。';status.classList.add('show');toast(copied?'已复制，去微信发送':'请手动复制安排')}
+    document.addEventListener('DOMContentLoaded',()=>{defaultDate();for(let i=0;i<16;i++){const h=document.createElement('span');h.className='heart';h.textContent=['◆','✦','♠','◇'][Math.floor(Math.random()*4)];h.style.left=Math.random()*100+'%';h.style.setProperty('--duration',6+Math.random()*8+'s');h.style.setProperty('--delay',Math.random()*8+'s');h.style.fontSize=.8+Math.random()*.8+'rem';$('hearts').appendChild(h)}
+      $('yesBtn').onclick=()=>show('step2');$('backBtn').onclick=()=>show('step1');
+      const noBtn=$('noBtn');
+      function moveNoButton(event){
+        if(event){event.preventDefault();event.stopPropagation()}
+        const margin=14;
+        const maxX=Math.max(margin,window.innerWidth-noBtn.offsetWidth-margin);
+        const maxY=Math.max(margin,window.innerHeight-noBtn.offsetHeight-margin);
+        const x=margin+Math.random()*Math.max(0,maxX-margin);
+        const y=margin+Math.random()*Math.max(0,maxY-margin);
+        noBtn.classList.add('moved');
+        noBtn.style.left=`${x}px`;
+        noBtn.style.top=`${y}px`;
+        noBtn.textContent=['不要 😤','再试试？🥺','按不到吧～😜','还是答应我吧 💕'][Math.floor(Math.random()*4)];
+        $('runawayHint').textContent='它不想被按到，只能选择“好呀”啦～';
+        return false;
+      }
+      noBtn.addEventListener('pointerenter',moveNoButton);
+      noBtn.addEventListener('pointerdown',moveNoButton,{passive:false});
+      noBtn.addEventListener('touchstart',moveNoButton,{passive:false});
+      noBtn.addEventListener('click',moveNoButton);
+      document.querySelectorAll('.food').forEach(el=>el.onclick=()=>{const name=el.dataset.food;el.classList.toggle('selected');state.foods=el.classList.contains('selected')?[...state.foods,name]:state.foods.filter(x=>x!==name)});
+      $('foodNext').onclick=()=>show('step3');$('confirmBtn').onclick=()=>{state.date=$('date').value;state.time=$('time').value;state.place=$('place').value.trim();state.message=$('message').value.trim();$('outDate').textContent=formatDate(state.date);$('outTime').textContent=state.time||'待商量';$('outFood').textContent=state.foods.join('、')||'到时候一起决定';$('outPlace').textContent=state.place||'到时候再定';$('outMessage').textContent=state.message||'（没有留言）';state.shareText=resultText();show('step4')};$('shareBtn').onclick=share;$('copyBtn').onclick=async()=>{const ok=await copyText(state.shareText);toast(ok?'约会结果已复制':'复制失败，请长按选择文字')}
+    });
+  </script>
+</body>
+</html>
